@@ -45,12 +45,22 @@ class FastAPIManager:
         
         # Set environment variables from config
         os.environ["OPENAI_API_KEY"] = self.entry.data[CONF_OPENAI_API_KEY]
-        os.environ["HA_URL"] = self.hass.config.api.base_url
+        
+        # Get Home Assistant URL (prefer internal, fallback to external)
+        ha_url = self.hass.config.internal_url or self.hass.config.external_url or "http://homeassistant.local:8123"
+        os.environ["HA_URL"] = ha_url
+        
+        # Get HA token - create a long-lived token or use existing
+        # For now, we'll use empty and rely on internal network access
         os.environ["HA_TOKEN"] = os.environ.get("SUPERVISOR_TOKEN", "")
         
-        if CONF_PERPLEXITY_API_KEY in self.entry.data:
+        # Optional: Perplexity API
+        if CONF_PERPLEXITY_API_KEY in self.entry.data and self.entry.data[CONF_PERPLEXITY_API_KEY]:
             os.environ["PERPLEXITY_API_KEY"] = self.entry.data[CONF_PERPLEXITY_API_KEY]
+        else:
+            os.environ["PERPLEXITY_API_KEY"] = ""
         
+        # Assistant configuration
         os.environ["ASSISTANT_NAME"] = self.entry.data.get(
             CONF_ASSISTANT_NAME, DEFAULT_ASSISTANT_NAME
         )
@@ -58,10 +68,16 @@ class FastAPIManager:
             CONF_OPENAI_TTS_VOICE, DEFAULT_TTS_VOICE
         )
         
-        if CONF_TELEGRAM_BOT_TOKEN in self.entry.data:
+        # Optional: Telegram
+        if CONF_TELEGRAM_BOT_TOKEN in self.entry.data and self.entry.data[CONF_TELEGRAM_BOT_TOKEN]:
             os.environ["TELEGRAM_BOT_TOKEN"] = self.entry.data[CONF_TELEGRAM_BOT_TOKEN]
-        if CONF_TELEGRAM_CHAT_ID in self.entry.data:
+        else:
+            os.environ["TELEGRAM_BOT_TOKEN"] = ""
+            
+        if CONF_TELEGRAM_CHAT_ID in self.entry.data and self.entry.data[CONF_TELEGRAM_CHAT_ID]:
             os.environ["TELEGRAM_CHAT_ID"] = self.entry.data[CONF_TELEGRAM_CHAT_ID]
+        else:
+            os.environ["TELEGRAM_CHAT_ID"] = ""
         
         os.environ["LOG_LEVEL"] = self.entry.options.get(
             CONF_LOG_LEVEL, DEFAULT_LOG_LEVEL
