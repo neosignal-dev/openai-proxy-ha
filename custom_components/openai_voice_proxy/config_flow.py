@@ -92,7 +92,7 @@ class OpenAIVoiceProxyOptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
-        self.config_entry = config_entry
+        self._config_entry = config_entry
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -104,25 +104,25 @@ class OpenAIVoiceProxyOptionsFlow(config_entries.OptionsFlow):
         options_schema = vol.Schema({
             vol.Optional(
                 CONF_ASSISTANT_NAME,
-                default=self.config_entry.data.get(
+                default=self._config_entry.data.get(
                     CONF_ASSISTANT_NAME, DEFAULT_ASSISTANT_NAME
                 )
             ): str,
             vol.Optional(
                 CONF_OPENAI_TTS_VOICE,
-                default=self.config_entry.data.get(
+                default=self._config_entry.data.get(
                     CONF_OPENAI_TTS_VOICE, DEFAULT_TTS_VOICE
                 )
             ): vol.In(TTS_VOICES),
             vol.Optional(
                 CONF_LOG_LEVEL,
-                default=self.config_entry.options.get(
+                default=self._config_entry.options.get(
                     CONF_LOG_LEVEL, DEFAULT_LOG_LEVEL
                 )
             ): vol.In(LOG_LEVELS),
             vol.Optional(
                 CONF_RATE_LIMIT,
-                default=self.config_entry.options.get(
+                default=self._config_entry.options.get(
                     CONF_RATE_LIMIT, DEFAULT_RATE_LIMIT
                 )
             ): cv.positive_int,

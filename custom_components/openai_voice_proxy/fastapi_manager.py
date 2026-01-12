@@ -99,8 +99,26 @@ class FastAPIManager:
     async def _run_server(self) -> None:
         """Run the FastAPI server."""
         try:
+            import sys
+            from pathlib import Path
+            
+            # Add integration directory to sys.path to find 'app' module
+            integration_dir = Path(__file__).parent
+            
+            if str(integration_dir) not in sys.path:
+                sys.path.insert(0, str(integration_dir))
+            
             import uvicorn
-            from app.main_v2 import app
+            
+            # Try to import app - if fails, log error and exit gracefully
+            try:
+                from app.main_v2 import app
+            except ImportError as err:
+                _LOGGER.error(
+                    "Failed to import FastAPI app. Make sure 'app' directory is copied to custom_components/openai_voice_proxy/"
+                )
+                _LOGGER.error("Import error: %s", err)
+                return
             
             config = uvicorn.Config(
                 app,
