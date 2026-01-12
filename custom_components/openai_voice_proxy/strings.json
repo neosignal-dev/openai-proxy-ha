@@ -1,0 +1,39 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "OpenAI Voice Assistant Setup",
+        "description": "Configure your OpenAI Voice Assistant",
+        "data": {
+          "openai_api_key": "OpenAI API Key",
+          "perplexity_api_key": "Perplexity API Key (optional)",
+          "assistant_name": "Assistant Name",
+          "openai_tts_voice": "TTS Voice",
+          "telegram_bot_token": "Telegram Bot Token (optional)",
+          "telegram_chat_id": "Telegram Chat ID (optional)"
+        }
+      }
+    },
+    "error": {
+      "invalid_api_key": "Invalid OpenAI API key",
+      "connection_error": "Unable to connect to OpenAI",
+      "unknown": "Unknown error occurred"
+    },
+    "abort": {
+      "already_configured": "This integration is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "OpenAI Voice Assistant Options",
+        "data": {
+          "assistant_name": "Assistant Name",
+          "openai_tts_voice": "TTS Voice",
+          "log_level": "Log Level",
+          "rate_limit_per_minute": "Rate Limit (requests/min)"
+        }
+      }
+    }
+  }
+}

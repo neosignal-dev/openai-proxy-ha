@@ -1,0 +1,67 @@
+search:
+  name: Web Search
+  description: Perform web search using Perplexity AI
+  fields:
+    query:
+      name: Query
+      description: Search query
+      required: true
+      example: "latest AI news"
+      selector:
+        text:
+
+send_telegram:
+  name: Send Telegram Message
+  description: Send message to configured Telegram chat
+  fields:
+    message:
+      name: Message
+      description: Message text to send
+      required: true
+      example: "Hello from Home Assistant!"
+      selector:
+        text:
+          multiline: true
+    parse_mode:
+      name: Parse Mode
+      description: Telegram message parse mode
+      default: "Markdown"
+      selector:
+        select:
+          options:
+            - "Markdown"
+            - "HTML"
+            - "MarkdownV2"
+
+search_habr:
+  name: Search Habr
+  description: Search articles on Habr.com
+  fields:
+    query:
+      name: Query
+      description: Search query
+      required: true
+      example: "Python asyncio"
+      selector:
+        text:
+    tags:
+      name: Tags
+      description: Filter by tags (comma-separated)
+      required: false
+      example: "python,backend"
+      selector:
+        text:
+    days:
+      name: Days
+      description: Search articles from last N days
+      default: 30
+      selector:
+        number:
+          min: 1
+          max: 365
+          mode: box
+
+get_context:
+  name: Get Home Assistant Context
+  description: Get full Home Assistant context (states, areas, devices)
+  fields: {}

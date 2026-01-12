@@ -1,0 +1,58 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Настройка голосового ассистента OpenAI",
+        "description": "Настройте голосовой ассистент OpenAI для Home Assistant",
+        "data": {
+          "openai_api_key": "API ключ OpenAI",
+          "perplexity_api_key": "API ключ Perplexity (опционально)",
+          "assistant_name": "Имя ассистента",
+          "openai_tts_voice": "Голос TTS",
+          "telegram_bot_token": "Токен Telegram бота (опционально)",
+          "telegram_chat_id": "ID чата Telegram (опционально)"
+        }
+      }
+    },
+    "error": {
+      "invalid_api_key": "Неверный API ключ OpenAI. Проверьте и попробуйте снова.",
+      "connection_error": "Не удалось подключиться к OpenAI API.",
+      "unknown": "Произошла неизвестная ошибка. Попробуйте снова."
+    },
+    "abort": {
+      "already_configured": "Эта интеграция уже настроена. Разрешена только одна копия."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Настройки голосового ассистента OpenAI",
+        "description": "Настройте дополнительные параметры ассистента",
+        "data": {
+          "assistant_name": "Имя ассистента",
+          "openai_tts_voice": "Голос TTS",
+          "log_level": "Уровень логирования",
+          "rate_limit_per_minute": "Лимит запросов (в минуту)"
+        }
+      }
+    }
+  },
+  "services": {
+    "search": {
+      "name": "Веб-поиск",
+      "description": "Выполнить поиск через Perplexity AI"
+    },
+    "send_telegram": {
+      "name": "Отправить в Telegram",
+      "description": "Отправить сообщение в настроенный Telegram чат"
+    },
+    "search_habr": {
+      "name": "Поиск на Habr",
+      "description": "Поиск статей на Habr.com"
+    },
+    "get_context": {
+      "name": "Получить контекст",
+      "description": "Получить полный контекст Home Assistant"
+    }
+  }
+}
