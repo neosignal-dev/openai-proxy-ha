@@ -18,16 +18,16 @@ from .const import (
     SERVICE_SEARCH_HABR,
     SERVICE_GET_CONTEXT,
 )
-from .fastapi_manager import FastAPIManager
 
 _LOGGER = logging.getLogger(__name__)
 
-type OpenAIVoiceProxyConfigEntry = ConfigEntry[FastAPIManager]
 
-
-async def async_setup_entry(hass: HomeAssistant, entry: OpenAIVoiceProxyConfigEntry) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up OpenAI Voice Assistant Proxy from a config entry."""
     _LOGGER.info("Setting up OpenAI Voice Assistant Proxy")
+    
+    # Import here to avoid import errors before dependencies are installed
+    from .fastapi_manager import FastAPIManager
     
     # Create FastAPI manager
     manager = FastAPIManager(hass, entry)
@@ -39,8 +39,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: OpenAIVoiceProxyConfigEn
         _LOGGER.error("Failed to start FastAPI server: %s", err)
         raise ConfigEntryNotReady(f"Failed to start FastAPI server: {err}") from err
     
-    # Store manager in runtime data
-    entry.runtime_data = manager
+    # Store manager in hass.data
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN][entry.entry_id] = manager
     
     # Setup platforms
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -52,7 +53,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: OpenAIVoiceProxyConfigEn
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: OpenAIVoiceProxyConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     _LOGGER.info("Unloading OpenAI Voice Assistant Proxy")
     
@@ -61,13 +62,13 @@ async def async_unload_entry(hass: HomeAssistant, entry: OpenAIVoiceProxyConfigE
     
     if unload_ok:
         # Stop FastAPI server
-        manager = entry.runtime_data
+        manager = hass.data[DOMAIN].pop(entry.entry_id)
         await manager.stop()
     
     return unload_ok
 
 
-async def async_setup_services(hass: HomeAssistant, manager: FastAPIManager) -> None:
+async def async_setup_services(hass: HomeAssistant, manager) -> None:
     """Set up services for the integration."""
     
     async def handle_search(call: ServiceCall) -> None:

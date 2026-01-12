@@ -6,7 +6,7 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 import homeassistant.helpers.config_validation as cv
 
@@ -31,19 +31,6 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-async def validate_openai_key(hass: HomeAssistant, api_key: str) -> bool:
-    """Validate OpenAI API key by making a test request."""
-    try:
-        import openai
-        client = openai.AsyncOpenAI(api_key=api_key)
-        # Simple validation - list models
-        await client.models.list()
-        return True
-    except Exception as err:
-        _LOGGER.error("OpenAI API key validation failed: %s", err)
-        return False
-
-
 class OpenAIVoiceProxyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for OpenAI Voice Assistant Proxy."""
 
@@ -60,10 +47,11 @@ class OpenAIVoiceProxyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             await self.async_set_unique_id(DOMAIN)
             self._abort_if_unique_id_configured()
 
-            # Validate OpenAI API key
-            if not await validate_openai_key(self.hass, user_input[CONF_OPENAI_API_KEY]):
+            # Basic validation - just check if key is provided
+            if not user_input.get(CONF_OPENAI_API_KEY):
                 errors["base"] = "invalid_api_key"
             else:
+                # API key validation will happen during setup
                 return self.async_create_entry(
                     title=user_input.get(CONF_ASSISTANT_NAME, DEFAULT_ASSISTANT_NAME),
                     data=user_input,

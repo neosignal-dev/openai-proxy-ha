@@ -32,7 +32,8 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up sensor entities."""
-    manager = config_entry.runtime_data
+    from .const import DOMAIN
+    manager = hass.data[DOMAIN][config_entry.entry_id]
     
     # Create coordinator for metrics updates
     coordinator = MetricsCoordinator(hass, manager)

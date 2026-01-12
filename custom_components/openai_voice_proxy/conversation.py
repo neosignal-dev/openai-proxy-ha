@@ -22,7 +22,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up conversation entities."""
-    manager = config_entry.runtime_data
+    manager = hass.data[DOMAIN][config_entry.entry_id]
     agent = OpenAIVoiceAgent(hass, config_entry, manager)
     
     conversation.async_set_agent(hass, config_entry, agent)
