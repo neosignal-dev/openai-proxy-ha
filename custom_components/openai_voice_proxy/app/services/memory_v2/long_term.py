@@ -2,8 +2,17 @@
 
 from typing import List, Dict, Any, Optional
 from datetime import datetime
-import chromadb
-from chromadb.config import Settings as ChromaSettings
+
+# Make ChromaDB optional
+try:
+    import chromadb
+    from chromadb.config import Settings as ChromaSettings
+    CHROMADB_AVAILABLE = True
+except ImportError:
+    chromadb = None
+    ChromaSettings = None
+    CHROMADB_AVAILABLE = False
+
 from app.services.memory_v2.embeddings import embedding_service
 from app.services.memory_v2.policy import MemoryType, MemoryImportance
 from app.core.config import settings
@@ -30,6 +39,13 @@ class LongTermMemory:
 
     async def initialize(self) -> None:
         """Initialize ChromaDB client and collections"""
+        
+        if not CHROMADB_AVAILABLE:
+            logger.warning(
+                "ChromaDB not available. Long-term memory disabled. "
+                "Install with: pip install chromadb"
+            )
+            return
         
         self.client = chromadb.Client(
             ChromaSettings(

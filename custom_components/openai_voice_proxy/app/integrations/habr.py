@@ -22,21 +22,27 @@ class HabrClient:
         self.rss_url = "https://habr.com/ru/rss"
         self.search_url = "https://habr.com/ru/search"
         self.user_agent = "Mozilla/5.0 (compatible; HomeAssistantBot/1.0; +https://example.com/bot)"
-        self.client = httpx.AsyncClient(
-            headers={
-                "User-Agent": self.user_agent,
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
-            },
-            timeout=30.0,
-            follow_redirects=True,
-        )
+        self.client: Optional[httpx.AsyncClient] = None
         self._cache: Dict[str, Any] = {}
         self._cache_timestamps: Dict[str, datetime] = {}
+    
+    async def _ensure_client(self):
+        """Ensure HTTP client is initialized (lazy initialization to avoid blocking calls)"""
+        if self.client is None:
+            self.client = httpx.AsyncClient(
+                headers={
+                    "User-Agent": self.user_agent,
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                    "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
+                },
+                timeout=30.0,
+                follow_redirects=True,
+            )
 
     async def close(self):
         """Close HTTP client"""
-        await self.client.aclose()
+        if self.client:
+            await self.client.aclose()
 
     def _check_cache(self, cache_key: str) -> Optional[Any]:
         """Check if cache entry is valid
@@ -83,17 +89,20 @@ class HabrClient:
         limit: int = 10,
     ) -> List[Dict[str, Any]]:
         """Search Habr via RSS feed (preferred method)
-        
+
         Args:
             query: Search query
             tags: Filter by tags
             hubs: Filter by hubs
             days: Filter articles from last N days
             limit: Maximum number of results
-            
+
         Returns:
             List of articles
         """
+        # Ensure client is initialized
+        await self._ensure_client()
+        
         # Check rate limit
         allowed, wait_time = rate_limiter.check_limit(
             "habr",
@@ -197,15 +206,18 @@ class HabrClient:
         limit: int = 10,
     ) -> List[Dict[str, Any]]:
         """Search Habr via HTML scraping (fallback method)
-        
+
         Args:
             query: Search query
             days: Filter articles from last N days
             limit: Maximum number of results
-            
+
         Returns:
             List of articles
         """
+        # Ensure client is initialized
+        await self._ensure_client()
+        
         # Check rate limit
         allowed, wait_time = rate_limiter.check_limit(
             "habr",
