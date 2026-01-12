@@ -25,30 +25,38 @@ logger = get_logger(__name__)
 def check_dependencies():
     """Check critical dependencies on startup"""
     missing_deps = []
+    optional_missing = []
     
-    # Check websockets
+    # Check websockets (optional)
     try:
         import websockets
     except ImportError:
-        missing_deps.append("websockets")
+        optional_missing.append("websockets")
     
-    # Check numpy
+    # Check numpy (optional)
     try:
         import numpy
     except ImportError:
-        missing_deps.append("numpy")
+        optional_missing.append("numpy")
     
-    # Check chromadb
+    # Check chromadb (optional - for long-term memory)
     try:
         import chromadb
     except ImportError:
-        missing_deps.append("chromadb")
+        optional_missing.append("chromadb")
+        logger.warning("ChromaDB not available. Long-term memory will be disabled.")
     
-    # Check openai
+    # Check openai (required)
     try:
         from openai import AsyncOpenAI
     except ImportError:
         missing_deps.append("openai")
+    
+    if optional_missing:
+        logger.warning(
+            "Optional dependencies missing (some features disabled)",
+            missing=optional_missing,
+        )
     
     if missing_deps:
         logger.error(

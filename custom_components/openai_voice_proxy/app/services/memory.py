@@ -3,8 +3,17 @@
 from typing import List, Dict, Optional, Any
 from datetime import datetime
 import json
-import chromadb
-from chromadb.config import Settings
+
+# Make ChromaDB optional
+try:
+    import chromadb
+    from chromadb.config import Settings
+    CHROMADB_AVAILABLE = True
+except ImportError:
+    chromadb = None
+    Settings = None
+    CHROMADB_AVAILABLE = False
+
 from openai import AsyncOpenAI
 from app.core.config import settings
 from app.core.logging import get_logger
@@ -20,13 +29,17 @@ class MemoryService:
     def __init__(self):
         self.openai_client = AsyncOpenAI(api_key=settings.openai_api_key)
         
-        # Initialize Chroma
-        self.chroma_client = chromadb.Client(
-            Settings(
-                persist_directory=settings.chroma_persist_dir,
-                anonymized_telemetry=False,
+        # Initialize Chroma if available
+        if CHROMADB_AVAILABLE:
+            self.chroma_client = chromadb.Client(
+                Settings(
+                    persist_directory=settings.chroma_persist_dir,
+                    anonymized_telemetry=False,
+                )
             )
-        )
+        else:
+            self.chroma_client = None
+            logger.warning("ChromaDB not available. Vector search disabled.")
         
         # Create or get collections
         self.conversations_collection = self.chroma_client.get_or_create_collection(

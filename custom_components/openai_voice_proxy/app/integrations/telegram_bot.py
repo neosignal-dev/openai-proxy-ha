@@ -16,13 +16,21 @@ class TelegramClient:
 
     def __init__(self):
         self.enabled = bool(settings.telegram_bot_token and settings.telegram_chat_id)
+        self.bot: Optional[Bot] = None
+        self.chat_id = settings.telegram_chat_id if self.enabled else None
+        self._initialized = False
+        
         if self.enabled:
-            self.bot = Bot(token=settings.telegram_bot_token)
-            self.chat_id = settings.telegram_chat_id
-            logger.info("Telegram bot initialized", chat_id=self.chat_id)
+            logger.info("Telegram bot will be initialized on first use", chat_id=self.chat_id)
         else:
-            self.bot = None
             logger.info("Telegram bot disabled (missing token or chat_id)")
+    
+    async def _ensure_bot(self):
+        """Ensure bot is initialized (lazy initialization to avoid blocking calls)"""
+        if self.enabled and not self._initialized:
+            self.bot = Bot(token=settings.telegram_bot_token)
+            self._initialized = True
+            logger.info("Telegram bot initialized", chat_id=self.chat_id)
 
     async def send_message(
         self,
@@ -43,6 +51,9 @@ class TelegramClient:
         if not self.enabled:
             logger.warning("Telegram not enabled, message not sent")
             return False
+        
+        # Ensure bot is initialized
+        await self._ensure_bot()
 
         try:
             await self.bot.send_message(
